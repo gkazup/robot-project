@@ -2,17 +2,20 @@
 #include <Wire.h>
 
 // connect motor controller pins to Arduino digital pins
-int standby = 5;
+const int standby = 5;
 // motor one
-int apwm = 6;
-int ain1 = 7;
-int ain2 = 8;
+const int apwm = 6;
+const int ain1 = 7;
+const int ain2 = 8;
 // motor two
-int bpwm = 11;
-int bin1 = 4;
-int bin2 = 12;
+const int bpwm = 11;
+const int bin1 = 4;
+const int bin2 = 12;
 
+// changing values
 String datastring = "";
+int apwm_value = 0;
+int bpwm_value = 0;
 
 
 // fancy motor control function
@@ -62,23 +65,31 @@ void stay()
 void receiveEvent(int howMany)
 {
   char c;
-  datastring = "";
+  String received = "";
+  int i = 0;
 
   while (0 < Wire.available()) { // loop through all received data
     c = Wire.read();            // receive each byte as a character
-    datastring += c;            // add to string
+    if (c == 0 && i == 0) return;  // if the first byte is a 0 then it will be the register setting for the data request
+    i++;
+    received += c;              // add to string
   }
+  datastring = received;        // update global datastring
 }
 
 
+// function that executes whenever data is requested by master
+// this function is registered as an event
 void sendEvent()
 {
-  String data = String(apwm) + " " + String(bpwm);
-  int len = data.length()+1;
+  int len = 4;               // create the char array +1 for closing zero
   char ascii[len];
 
-  data.toCharArray(ascii, len);
-  Wire.write(ascii, len);
+  ascii[0] = 111;            // check byte
+  ascii[1] = apwm_value;     // fill up the char array
+  ascii[2] = bpwm_value;
+  ascii[3] = 0;
+  Wire.write(ascii, len);    // send data over wire
 }
 
 
@@ -103,18 +114,15 @@ void setup()
   digitalWrite(bin2, LOW);
   analogWrite(bpwm, 0);
 
-  Wire.begin(8);                // join i2c bus with address #8
+  Wire.begin(8);                // join i2c bus with address #0x08
   Wire.onReceive(receiveEvent); // register receive event
   Wire.onRequest(sendEvent);    // register send event
 }
 
+
 void loop()
 {
-  int pwm = 0;
-  int pwm1 = 0;
-  int pwm2 = 0;
-
-  if (datastring == ""){
+  if (datastring == ""){        // loop if there is nothing to do
     return;
   }
 
@@ -126,31 +134,33 @@ void loop()
       digitalWrite(standby, LOW);
       break;
     case 'f':                    // drive forward - direction follows
-      pwm = datastring.substring(2).toInt();
-      motorcontrol(pwm,pwm);
+      apwm_value = datastring.substring(2).toInt();
+      bpwm_value = apwm_value;
+      motorcontrol(apwm_value, bpwm_value);
       break;
     case 'b':                    // drive backwards - direction follows
-      pwm = datastring.substring(2).toInt();
-      motorcontrol((-1 * pwm),(-1 * pwm));
+      apwm_value = datastring.substring(2).toInt();
+      bpwm_value = apwm_value;
+      motorcontrol((-1 * apwm_value),(-1 * bpwm_value));
       break;
     case 's':                    // stop!
       stay();
       break;
     case 't':                    // turn
-      pwm1 = datastring.substring(3,datastring.indexOf(' ',3)).toInt();
-      pwm2 = datastring.substring(datastring.indexOf(' ',3)+1).toInt();
+      apwm_value = datastring.substring(3,datastring.indexOf(' ',3)).toInt();
+      bpwm_value = datastring.substring(datastring.indexOf(' ',3)+1).toInt();
       switch (datastring[1]) {
         case 'f':                    // turn forward
-          motorcontrol(pwm1,pwm2);
+          motorcontrol(apwm_value, bpwm_value);
           break;
         case 'b':                    // turn backward
-          motorcontrol((-1 * pwm1),(-1 * pwm2));
+          motorcontrol((-1 * apwm_value),(-1 * bpwm_value));
           break;
         case 'l':                    // turn on the same spot left
-          motorcontrol((-1 * pwm1),(pwm2));
+          motorcontrol((-1 * apwm_value),(bpwm_value));
           break;
         case 'r':                    // turn on the same spot right
-          motorcontrol((pwm1),(-1 * pwm2));
+          motorcontrol((apwm_value),(-1 * bpwm_value));
           break;
         default:
           break;
