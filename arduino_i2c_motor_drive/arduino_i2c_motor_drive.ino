@@ -21,26 +21,24 @@ int bpwm_value = 0;
 // fancy motor control function
 void motorcontrol(int pwm1,int pwm2)
 {
-  if (pwm1 > 0) {
-    digitalWrite(ain1, HIGH);
-    digitalWrite(ain2, LOW);
-    analogWrite(apwm, pwm1);
-  }
   if (pwm1 < 0) {
     digitalWrite(ain1, LOW);
     digitalWrite(ain2, HIGH);
     analogWrite(apwm, (-1 * pwm1));
+  } else {
+    digitalWrite(ain1, HIGH);
+    digitalWrite(ain2, LOW);
+    analogWrite(apwm, pwm1);
   }
   
-  if (pwm2 > 0) {
-    digitalWrite(bin1, HIGH);
-    digitalWrite(bin2, LOW);
-    analogWrite(bpwm, pwm2);
-  }
   if (pwm2 < 0) {
     digitalWrite(bin1, LOW);
     digitalWrite(bin2, HIGH);
     analogWrite(bpwm, (-1 * pwm2));
+  } else {
+    digitalWrite(bin1, HIGH);
+    digitalWrite(bin2, LOW);
+    analogWrite(bpwm, pwm2);
   }
 }
 
@@ -85,7 +83,7 @@ void sendEvent()
   int len = 4;               // create the char array +1 for closing zero
   char ascii[len];
 
-  ascii[0] = 111;            // check byte
+  ascii[0] = 111;            // fix check byte
   ascii[1] = apwm_value;     // fill up the char array with the pwm values
   ascii[2] = bpwm_value;
   ascii[3] = 0;              // end with a zero
