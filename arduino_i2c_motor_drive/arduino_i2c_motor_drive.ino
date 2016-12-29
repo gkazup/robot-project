@@ -86,9 +86,9 @@ void sendEvent()
   char ascii[len];
 
   ascii[0] = 111;            // check byte
-  ascii[1] = apwm_value;     // fill up the char array
+  ascii[1] = apwm_value;     // fill up the char array with the pwm values
   ascii[2] = bpwm_value;
-  ascii[3] = 0;
+  ascii[3] = 0;              // end with a zero
   Wire.write(ascii, len);    // send data over wire
 }
 
@@ -145,6 +145,8 @@ void loop()
       break;
     case 's':                    // stop!
       stay();
+      apwm_value = 0;
+      bpwm_value = 0;
       break;
     case 't':                    // turn
       apwm_value = datastring.substring(3,datastring.indexOf(' ',3)).toInt();
@@ -170,6 +172,6 @@ void loop()
       break;
     }
 
-    datastring = "";
+    datastring = "";            // zero out command string
 }
 
