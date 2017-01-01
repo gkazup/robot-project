@@ -32,12 +32,12 @@ void motorcontrol(int pwm1,int pwm2)
   }
   
   if (pwm2 < 0) {
-    digitalWrite(bin1, LOW);
-    digitalWrite(bin2, HIGH);
-    analogWrite(bpwm, (-1 * pwm2));
-  } else {
     digitalWrite(bin1, HIGH);
     digitalWrite(bin2, LOW);
+    analogWrite(bpwm, (-1 * pwm2));
+  } else {
+    digitalWrite(bin1, LOW);
+    digitalWrite(bin2, HIGH);
     analogWrite(bpwm, pwm2);
   }
 }
