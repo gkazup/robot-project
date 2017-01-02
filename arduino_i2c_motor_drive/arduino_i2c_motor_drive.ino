@@ -2,15 +2,15 @@
 #include <Wire.h>
 
 // connect motor controller pins to Arduino digital pins
-const int standby = 5;
+#define STANDBY 5
 // motor one
-const int apwm = 6;
-const int ain1 = 7;
-const int ain2 = 8;
+#define APWM 6
+#define AIN1 7
+#define AIN2 8
 // motor two
-const int bpwm = 11;
-const int bin1 = 4;
-const int bin2 = 12;
+#define BPWM 11
+#define BIN1 4
+#define BIN2 12
 
 // changing values
 String datastring = "";
@@ -22,23 +22,23 @@ int bpwm_value = 0;
 void motorcontrol(int pwm1,int pwm2)
 {
   if (pwm1 < 0) {
-    digitalWrite(ain1, LOW);
-    digitalWrite(ain2, HIGH);
-    analogWrite(apwm, (-1 * pwm1));
+    digitalWrite(AIN1, LOW);
+    digitalWrite(AIN2, HIGH);
+    analogWrite(APWM, (-1 * pwm1));
   } else {
-    digitalWrite(ain1, HIGH);
-    digitalWrite(ain2, LOW);
-    analogWrite(apwm, pwm1);
+    digitalWrite(AIN1, HIGH);
+    digitalWrite(AIN2, LOW);
+    analogWrite(APWM, pwm1);
   }
   
   if (pwm2 < 0) {
-    digitalWrite(bin1, HIGH);
-    digitalWrite(bin2, LOW);
-    analogWrite(bpwm, (-1 * pwm2));
+    digitalWrite(BIN1, HIGH);
+    digitalWrite(BIN2, LOW);
+    analogWrite(BPWM, (-1 * pwm2));
   } else {
-    digitalWrite(bin1, LOW);
-    digitalWrite(bin2, HIGH);
-    analogWrite(bpwm, pwm2);
+    digitalWrite(BIN1, LOW);
+    digitalWrite(BIN2, HIGH);
+    analogWrite(BPWM, pwm2);
   }
 }
 
@@ -47,14 +47,14 @@ void motorcontrol(int pwm1,int pwm2)
 void stay()
 {
   // turn off motors
-  digitalWrite(ain1, LOW);
-  digitalWrite(ain2, LOW);  
-  digitalWrite(bin1, LOW);
-  digitalWrite(bin2, LOW);
+  digitalWrite(AIN1, LOW);
+  digitalWrite(AIN2, LOW);  
+  digitalWrite(BIN1, LOW);
+  digitalWrite(BIN2, LOW);
 
   // set the speed
-  analogWrite(apwm, 0);
-  analogWrite(bpwm, 0);
+  analogWrite(APWM, 0);
+  analogWrite(BPWM, 0);
 }
 
 
@@ -95,22 +95,22 @@ void setup()
 {
   // set all the motor control pins to outputs
   // and zero all values
-  pinMode(standby, OUTPUT);
-  digitalWrite(standby, LOW);  // disable motor driver
+  pinMode(STANDBY, OUTPUT);
+  digitalWrite(STANDBY, LOW);  // disable motor driver
 
-  pinMode(apwm, OUTPUT);
-  pinMode(ain1, OUTPUT);
-  pinMode(ain2, OUTPUT);
-  digitalWrite(ain1, LOW);
-  digitalWrite(ain2, LOW);
-  analogWrite(apwm, 0);
+  pinMode(APWM, OUTPUT);
+  pinMode(AIN1, OUTPUT);
+  pinMode(AIN2, OUTPUT);
+  digitalWrite(AIN1, LOW);
+  digitalWrite(AIN2, LOW);
+  analogWrite(APWM, 0);
   
-  pinMode(bpwm, OUTPUT);
-  pinMode(bin1, OUTPUT);
-  pinMode(bin2, OUTPUT);
-  digitalWrite(bin1, LOW);
-  digitalWrite(bin2, LOW);
-  analogWrite(bpwm, 0);
+  pinMode(BPWM, OUTPUT);
+  pinMode(BIN1, OUTPUT);
+  pinMode(BIN2, OUTPUT);
+  digitalWrite(BIN1, LOW);
+  digitalWrite(BIN2, LOW);
+  analogWrite(BPWM, 0);
 
   Wire.begin(8);                // join i2c bus with address #0x08
   Wire.onReceive(receiveEvent); // register receive event
@@ -126,10 +126,10 @@ void loop()
 
   switch (datastring[0]) {
     case 'e':                    // enable motor driver
-      digitalWrite(standby, HIGH);
+      digitalWrite(STANDBY, HIGH);
       break;
     case 'd':                    // disable motor driver
-      digitalWrite(standby, LOW);
+      digitalWrite(STANDBY, LOW);
       break;
     case 'f':                    // drive forward - direction follows
       apwm_value = datastring.substring(2).toInt();

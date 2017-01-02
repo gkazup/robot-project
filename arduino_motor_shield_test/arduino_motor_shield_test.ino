@@ -1,58 +1,58 @@
 // connect motor controller pins to Arduino digital pins
-int standby = 5;
+#define STANDBY 5
 // motor one
-int apwm = 6;
-int ain1 = 7;
-int ain2 = 8;
+#define APWM 6
+#define AIN1 7
+#define AIN2 8
 // motor two
-int bpwm = 11;
-int bin1 = 4;
-int bin2 = 12;
+#define BPWM 11
+#define BIN1 4
+#define BIN2 12
 
 void setup()
 {
   // set all the motor control pins to outputs
   // and zero all values
-  pinMode(standby, OUTPUT);
-  pinMode(apwm, OUTPUT);
-  pinMode(ain1, OUTPUT);
-  pinMode(ain2, OUTPUT);
-  digitalWrite(ain1, LOW);
-  digitalWrite(ain2, LOW);
-  analogWrite(apwm, 0);
+  pinMode(STANDBY, OUTPUT);
+  pinMode(APWM, OUTPUT);
+  pinMode(AIN1, OUTPUT);
+  pinMode(AIN2, OUTPUT);
+  digitalWrite(AIN1, LOW);
+  digitalWrite(AIN2, LOW);
+  analogWrite(APWM, 0);
   
-  pinMode(bpwm, OUTPUT);
-  pinMode(bin1, OUTPUT);
-  pinMode(bin2, OUTPUT);
-  digitalWrite(bin1, LOW);
-  digitalWrite(bin2, LOW);
-  analogWrite(bpwm, 0);
+  pinMode(BPWM, OUTPUT);
+  pinMode(BIN1, OUTPUT);
+  pinMode(BIN2, OUTPUT);
+  digitalWrite(BIN1, LOW);
+  digitalWrite(BIN2, LOW);
+  analogWrite(BPWM, 0);
 }
 
 void demoOne()
 {
   // this function will run the motors in both directions at a fixed speed
   // turn on motor A
-  digitalWrite(ain1, HIGH);
-  digitalWrite(ain2, LOW);
+  digitalWrite(AIN1, HIGH);
+  digitalWrite(AIN2, LOW);
   // turn on motor B
-  digitalWrite(bin1, HIGH);
-  digitalWrite(bin2, LOW);
+  digitalWrite(BIN1, HIGH);
+  digitalWrite(BIN2, LOW);
   // set speed to 200 out of possible range 0~255
-  analogWrite(bpwm, 200);
-  analogWrite(apwm, 200);
+  analogWrite(BPWM, 200);
+  analogWrite(APWM, 200);
   delay(2000);
   // now change motor directions
-  digitalWrite(ain1, LOW);
-  digitalWrite(ain2, HIGH);  
-  digitalWrite(bin1, LOW);
-  digitalWrite(bin2, HIGH); 
+  digitalWrite(AIN1, LOW);
+  digitalWrite(AIN2, HIGH);  
+  digitalWrite(BIN1, LOW);
+  digitalWrite(BIN2, HIGH); 
   delay(2000);
   // now turn off motors
-  digitalWrite(ain1, LOW);
-  digitalWrite(ain2, LOW);  
-  digitalWrite(bin1, LOW);
-  digitalWrite(bin2, LOW);
+  digitalWrite(AIN1, LOW);
+  digitalWrite(AIN2, LOW);  
+  digitalWrite(BIN1, LOW);
+  digitalWrite(BIN2, LOW);
 }
 
 void demoTwo()
@@ -62,37 +62,37 @@ void demoTwo()
   // the PWM values sent by analogWrite() are fractions of the maximum speed possible 
   // by your hardware
   // turn on motors
-  digitalWrite(ain1, LOW);
-  digitalWrite(ain2, HIGH);  
-  digitalWrite(bin1, LOW);
-  digitalWrite(bin2, HIGH); 
+  digitalWrite(AIN1, LOW);
+  digitalWrite(AIN2, HIGH);  
+  digitalWrite(BIN1, LOW);
+  digitalWrite(BIN2, HIGH); 
   // accelerate from zero to maximum speed
   for (int i = 0; i < 256; i++)
   {
-    analogWrite(apwm, i);
-    analogWrite(bpwm, i);
+    analogWrite(APWM, i);
+    analogWrite(BPWM, i);
     delay(200);
   } 
   // decelerate from maximum speed to zero
   for (int i = 255; i >= 0; --i)
   {
-    analogWrite(apwm, i);
-    analogWrite(bpwm, i);
+    analogWrite(APWM, i);
+    analogWrite(BPWM, i);
     delay(200);
   } 
   // now turn off motors
-  digitalWrite(ain1, LOW);
-  digitalWrite(ain2, LOW);  
-  digitalWrite(bin1, LOW);
-  digitalWrite(bin2, LOW);  
+  digitalWrite(AIN1, LOW);
+  digitalWrite(AIN2, LOW);  
+  digitalWrite(BIN1, LOW);
+  digitalWrite(BIN2, LOW);  
 }
 
 void loop()
 {
   delay(5000);
-  digitalWrite(standby, HIGH);
+  digitalWrite(STANDBY, HIGH);
   demoOne();
-  digitalWrite(standby, LOW);
+  digitalWrite(STANDBY, LOW);
   delay(1000);
   demoTwo();
   delay(1000);
