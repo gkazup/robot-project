@@ -45,11 +45,13 @@ void setup()
   digitalWrite(BIN2, LOW);
   analogWrite(BPWM, 0);
 
+  // register rev counters and interrupts
   pinMode(INPINL, INPUT_PULLUP);      // enable pullup on interrupt PIN
   attachInterrupt(digitalPinToInterrupt(INPINL), motor_rpm_left, FALLING); // interrupt registration
   pinMode(INPINR, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(INPINR), motor_rpm_right, FALLING); // interrupt registration
 
+  //initialize I2C communication
   Wire.begin(8);                // join i2c bus with address #0x08
   Wire.onReceive(receiveEvent); // register receive event
   Wire.onRequest(sendEvent);    // register send event
@@ -175,14 +177,23 @@ void receiveEvent(int howMany)
 // this function is registered as an event
 void sendEvent()
 {
-  int len = 4;               // create the char array +1 for closing zero
-  char ascii[len];
-
+  int len = 12;               // length of the char array +1 for closing zero
+  char ascii[len];           // buffer to send
+  unsigned long localrevleft = revleft;   // save the actual rev values for sending
+  unsigned long localrevright = revright;
+  String hexstring;
+  char buff[8];
+  
   ascii[0] = 111;            // fix check byte
-  ascii[1] = apwm_value;     // fill up the char array with the pwm values
+  ascii[1] = apwm_value;     // fill up the char array first with the pwm values
   ascii[2] = bpwm_value;
-  ascii[3] = 0;              // end with a zero
-  Wire.write(ascii, len);    // send data over wire
+
+  hexstring = String(revleft, HEX);   // put the rev values there in HEX format
+  hexstring.toCharArray(buff, hexstring.length());
+  ascii[3] = 0;
+  
+  ascii[11] = 0;              // end with a zero  
+  Wire.write(ascii, len);    // send the buffer data over the wire
 }
 
 // functions to trigger by the hall sensor interrupts
