@@ -12,83 +12,16 @@
 #define BIN1 4
 #define BIN2 12
 
+// hall efect sensor pins
+#define INPINR 2
+#define INPINL 3
+
 // changing values
 String datastring = "";
 int apwm_value = 0;
 int bpwm_value = 0;
-
-
-// fancy motor control function
-void motorcontrol(int pwm1,int pwm2)
-{
-  if (pwm1 < 0) {
-    digitalWrite(AIN1, LOW);
-    digitalWrite(AIN2, HIGH);
-    analogWrite(APWM, (-1 * pwm1));
-  } else {
-    digitalWrite(AIN1, HIGH);
-    digitalWrite(AIN2, LOW);
-    analogWrite(APWM, pwm1);
-  }
-  
-  if (pwm2 < 0) {
-    digitalWrite(BIN1, HIGH);
-    digitalWrite(BIN2, LOW);
-    analogWrite(BPWM, (-1 * pwm2));
-  } else {
-    digitalWrite(BIN1, LOW);
-    digitalWrite(BIN2, HIGH);
-    analogWrite(BPWM, pwm2);
-  }
-}
-
-
-// this function will stop all movement
-void stay()
-{
-  // turn off motors
-  digitalWrite(AIN1, LOW);
-  digitalWrite(AIN2, LOW);  
-  digitalWrite(BIN1, LOW);
-  digitalWrite(BIN2, LOW);
-
-  // set the speed
-  analogWrite(APWM, 0);
-  analogWrite(BPWM, 0);
-}
-
-
-// function that executes whenever data is received from master
-// this function is registered as an event
-void receiveEvent(int howMany)
-{
-  char c;
-  String received = "";
-  int i = 0;
-
-  while (0 < Wire.available()) { // loop through all received data
-    c = Wire.read();            // receive each byte as a character
-    if (c == 0 && i == 0) return;  // if the first byte is a 0 then it will be the register setting for the data request
-    i++;
-    received += c;              // add to string
-  }
-  datastring = received;        // update global datastring
-}
-
-
-// function that executes whenever data is requested by master
-// this function is registered as an event
-void sendEvent()
-{
-  int len = 4;               // create the char array +1 for closing zero
-  char ascii[len];
-
-  ascii[0] = 111;            // fix check byte
-  ascii[1] = apwm_value;     // fill up the char array with the pwm values
-  ascii[2] = bpwm_value;
-  ascii[3] = 0;              // end with a zero
-  Wire.write(ascii, len);    // send data over wire
-}
+volatile unsigned long revleft = 0;
+volatile unsigned long revright = 0;
 
 
 void setup()
@@ -112,6 +45,11 @@ void setup()
   digitalWrite(BIN2, LOW);
   analogWrite(BPWM, 0);
 
+  pinMode(INPINL, INPUT_PULLUP);      // enable pullup on interrupt PIN
+  attachInterrupt(digitalPinToInterrupt(INPINL), motor_rpm_left, FALLING); // interrupt registration
+  pinMode(INPINR, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(INPINR), motor_rpm_right, FALLING); // interrupt registration
+
   Wire.begin(8);                // join i2c bus with address #0x08
   Wire.onReceive(receiveEvent); // register receive event
   Wire.onRequest(sendEvent);    // register send event
@@ -125,6 +63,10 @@ void loop()
   }
 
   switch (datastring[0]) {
+    case 'z':                    // zero out rev counters
+      revleft = 0;
+      revright = 0;
+      break;
     case 'e':                    // enable motor driver
       digitalWrite(STANDBY, HIGH);
       break;
@@ -171,5 +113,87 @@ void loop()
     }
 
     datastring = "";            // zero out command string
+}
+
+
+// fancy motor control function
+void motorcontrol(int pwm1,int pwm2)
+{
+  if (pwm1 < 0) {
+    digitalWrite(AIN1, LOW);
+    digitalWrite(AIN2, HIGH);
+    analogWrite(APWM, (-1 * pwm1));
+  } else {
+    digitalWrite(AIN1, HIGH);
+    digitalWrite(AIN2, LOW);
+    analogWrite(APWM, pwm1);
+  }
+  
+  if (pwm2 < 0) {
+    digitalWrite(BIN1, HIGH);
+    digitalWrite(BIN2, LOW);
+    analogWrite(BPWM, (-1 * pwm2));
+  } else {
+    digitalWrite(BIN1, LOW);
+    digitalWrite(BIN2, HIGH);
+    analogWrite(BPWM, pwm2);
+  }
+}
+
+// this function will stop all movement
+void stay()
+{
+  // turn off motors
+  digitalWrite(AIN1, LOW);
+  digitalWrite(AIN2, LOW);  
+  digitalWrite(BIN1, LOW);
+  digitalWrite(BIN2, LOW);
+
+  // set the speed
+  analogWrite(APWM, 0);
+  analogWrite(BPWM, 0);
+}
+
+// function that executes whenever data is received from master
+// this function is registered as an event
+void receiveEvent(int howMany)
+{
+  char c;
+  String received = "";
+  int i = 0;
+
+  while (0 < Wire.available()) { // loop through all received data
+    c = Wire.read();            // receive each byte as a character
+    if (c == 0 && i == 0) return;  // if the first byte is a 0 then it will be the register setting for the data request
+    i++;
+    received += c;              // add to string
+  }
+  datastring = received;        // update global datastring
+}
+
+// function that executes whenever data is requested by master
+// this function is registered as an event
+void sendEvent()
+{
+  int len = 4;               // create the char array +1 for closing zero
+  char ascii[len];
+
+  ascii[0] = 111;            // fix check byte
+  ascii[1] = apwm_value;     // fill up the char array with the pwm values
+  ascii[2] = bpwm_value;
+  ascii[3] = 0;              // end with a zero
+  Wire.write(ascii, len);    // send data over wire
+}
+
+// functions to trigger by the hall sensor interrupts
+// these functions are registered as events
+void motor_rpm_left()
+{
+  revleft++;
+}
+
+void motor_rpm_right()
+{
+  revright++;
 }
 
