@@ -156,7 +156,7 @@ void stay()
   analogWrite(BPWM, 0);
 }
 
-// function that executes whenever data is received from master
+// function that executes whenever data is received from I2C master
 // this function is registered as an event
 void receiveEvent(int howMany)
 {
@@ -170,30 +170,29 @@ void receiveEvent(int howMany)
     i++;
     received += c;              // add to string
   }
-  datastring = received;        // update global datastring
+  datastring = received;        // update global datastring to store what was received
 }
 
-// function that executes whenever data is requested by master
+// function that executes whenever data is requested by I2C master
 // this function is registered as an event
 void sendEvent()
 {
-  int len = 12;               // length of the char array +1 for closing zero
-  char ascii[len];           // buffer to send
+  int len = 12;                  // length of the our array +1 for a closing zero
+  byte sendarray[len];           // buffer to send
   unsigned long localrevleft = revleft;   // save the actual rev values for sending
-  unsigned long localrevright = revright;
-  String hexstring;
-  char buff[8];
+  unsigned long localrevright = revright; // these are 4 byte in size
   
-  ascii[0] = 111;            // fix check byte
-  ascii[1] = apwm_value;     // fill up the char array first with the pwm values
-  ascii[2] = bpwm_value;
+  sendarray[0] = 111;            // first fix check byte
+  sendarray[1] = apwm_value;     // fill up first the actual pwm values
+  sendarray[2] = bpwm_value;
 
-  hexstring = String(revleft, HEX);   // put the rev values there in HEX format
-  hexstring.toCharArray(buff, hexstring.length());
-  ascii[3] = 0;
+  for (int i=0; i<4; i++) {           // calculate the values on base 256
+    sendarray[6-i] = ((localrevleft >> (8*i)) & 0xFF);
+    sendarray[10-i] = ((localrevright >> (8*i)) & 0xFF);
+  }
   
-  ascii[11] = 0;              // end with a zero  
-  Wire.write(ascii, len);    // send the buffer data over the wire
+  sendarray[11] = 0;              // end with a zero  
+  Wire.write(sendarray, len);     // send the completed buffer data over the wire
 }
 
 // functions to trigger by the hall sensor interrupts
