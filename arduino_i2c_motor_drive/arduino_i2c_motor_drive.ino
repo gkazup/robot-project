@@ -1,7 +1,8 @@
 // Receives data as an I2C slave device
 #include <Wire.h>
+#include <NewPing.h>
 
-// connect motor controller pins to Arduino digital pins
+// connect motor controller pins to Arduino digital PINs
 #define STANDBY 5
 // motor one
 #define APWM 6
@@ -12,9 +13,19 @@
 #define BIN1 4
 #define BIN2 12
 
-// hall efect sensor pins
+// motor hall efect sensor PINs
 #define INPINR 2
 #define INPINL 3
+
+// SRF05 sensor PINs
+#define MAX_DISTANCE 200 // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
+#define TRIGGER_PIN_LEFT  A0  // we are using a single PIN to drive the sensors
+#define ECHO_PIN_LEFT     A0  // connect trigger to echo with a 2K resistor at sensor
+#define TRIGGER_PIN_MIDDLE  A1
+#define ECHO_PIN_MIDDLE     A1
+#define TRIGGER_PIN_RIGHT  A2
+#define ECHO_PIN_RIGHT     A2
+
 
 // changing values
 String datastring = "";
@@ -22,6 +33,10 @@ int apwm_value = 0;
 int bpwm_value = 0;
 volatile unsigned long revleft = 0;
 volatile unsigned long revright = 0;
+
+NewPing sonar_left(TRIGGER_PIN_LEFT, ECHO_PIN_LEFT, MAX_DISTANCE);       // NewPing setup for left sensor
+NewPing sonar_middle(TRIGGER_PIN_MIDDLE, ECHO_PIN_MIDDLE, MAX_DISTANCE); // NewPing setup for middle sensor
+NewPing sonar_right(TRIGGER_PIN_RIGHT, ECHO_PIN_RIGHT, MAX_DISTANCE);    // NewPing setup for right sensor
 
 
 void setup()
@@ -75,12 +90,12 @@ void loop()
     case 'd':                    // disable motor driver
       digitalWrite(STANDBY, LOW);
       break;
-    case 'f':                    // drive forward - direction follows
+    case 'f':                    // drive forward
       apwm_value = datastring.substring(2).toInt();
       bpwm_value = apwm_value;
       motorcontrol(apwm_value, bpwm_value);
       break;
-    case 'b':                    // drive backwards - direction follows
+    case 'b':                    // drive backwards
       apwm_value = datastring.substring(2).toInt();
       bpwm_value = apwm_value;
       motorcontrol((-1 * apwm_value),(-1 * bpwm_value));
@@ -90,7 +105,7 @@ void loop()
       apwm_value = 0;
       bpwm_value = 0;
       break;
-    case 't':                    // turn
+    case 't':                    // Turn. Second character determines how
       apwm_value = datastring.substring(3,datastring.indexOf(' ',3)).toInt();
       bpwm_value = datastring.substring(datastring.indexOf(' ',3)+1).toInt();
       switch (datastring[1]) {
@@ -114,7 +129,7 @@ void loop()
       break;
     }
 
-    datastring = "";            // zero out command string
+    datastring = "";            // zero out the command string
 }
 
 
@@ -151,7 +166,7 @@ void stay()
   digitalWrite(BIN1, LOW);
   digitalWrite(BIN2, LOW);
 
-  // set the speed
+  // set the speed to zero
   analogWrite(APWM, 0);
   analogWrite(BPWM, 0);
 }
@@ -168,35 +183,40 @@ void receiveEvent(int howMany)
     c = Wire.read();            // receive each byte as a character
     if (c == 0 && i == 0) return;  // if the first byte is a 0 then it will be the register setting for the data request
     i++;
-    received += c;              // add to string
+    received += c;              // add to the receiving string
   }
-  datastring = received;        // update global datastring to store what was received
+  datastring = received;        // update the global datastring to store what was received
 }
 
 // function that executes whenever data is requested by I2C master
 // this function is registered as an event
 void sendEvent()
 {
-  int len = 12;                  // length of the our array +1 for a closing zero
+  int len = 15;                  // length of the our array +1 for a closing zero
   byte sendarray[len];           // buffer to send
   unsigned long localrevleft = revleft;   // save the actual rev values for sending
   unsigned long localrevright = revright; // these are 4 byte in size
   
   sendarray[0] = 111;            // first fix check byte
-  sendarray[1] = apwm_value;     // fill up first the actual pwm values
+  sendarray[1] = apwm_value;     // fill in the actual motor pwm values
   sendarray[2] = bpwm_value;
 
-  for (int i=0; i<4; i++) {           // calculate the values on base 256
-    sendarray[6-i] = ((localrevleft >> (8*i)) & 0xFF);
+  for (int i=0; i<4; i++) {           // fill in the motor rev counters
+    sendarray[6-i] = ((localrevleft >> (8*i)) & 0xFF);    // calculate the values on base 256
     sendarray[10-i] = ((localrevright >> (8*i)) & 0xFF);
   }
+
+  sendarray[11] = sonar_left.ping_cm();   // fill in the actual sonar values
+  sendarray[12] = sonar_middle.ping_cm();
+  sendarray[13] = sonar_right.ping_cm();
   
-  sendarray[11] = 0;              // end with a zero  
+  sendarray[14] = 0;              // end the buffer with a zero  
   Wire.write(sendarray, len);     // send the completed buffer data over the wire
 }
 
 // functions to trigger by the hall sensor interrupts
-// these functions are registered as events
+// these functions are registered as events and should be as simple as possible
+// as the motors can run at 11500 rpm
 void motor_rpm_left()
 {
   revleft++;
