@@ -58,5 +58,5 @@ while True:
     writeWireString(var)
     time.sleep(0.5)
     print "Receiving:"
-    print readWire(4)
+    print readWire(15)
 
