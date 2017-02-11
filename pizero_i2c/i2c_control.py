@@ -51,7 +51,7 @@ def signal_handler(signal, frame):
 signal.signal(signal.SIGINT, signal_handler)
 
 while True:
-    var = input("")
+    var = raw_input("")
     if not var:
         continue
     print "Sending '%s'" % (var)
