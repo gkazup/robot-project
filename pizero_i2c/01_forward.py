@@ -19,15 +19,22 @@ def writeWireString(value):
         for index in range(1,(count)):
             byte_list.append(ord(value[index]))
     print count,ord(value[0]),byte_list
-    bus.write_i2c_block_data(address, ord(value[0]), byte_list)
+    try:
+        bus.write_i2c_block_data(address, ord(value[0]), byte_list)
+    except IOError:
+        print "Error: IOError occured while sending"
     return -1
 
 
 # read number of bytes from the i2c wire
 # and return it as a string
 def readWireString(numbytes):
+    byte_list = []
     data = ""
-    byte_list = bus.read_i2c_block_data(address, 0, numbytes)
+    try:
+        byte_list = bus.read_i2c_block_data(address, 0, numbytes)
+    except IOError:
+        print "Error: IOError occured while receiving"
     print byte_list
     for byte in byte_list:
         if (byte == 0):
@@ -39,8 +46,11 @@ def readWireString(numbytes):
 # read number of bytes from the i2c wire
 # and return them as byte list
 def readWire(numbytes):
-    data = ""
-    byte_list = bus.read_i2c_block_data(address, 0, numbytes)
+    byte_list = []
+    try:
+        byte_list = bus.read_i2c_block_data(address, 0, numbytes)
+    except IOError:
+        print "Error: IOError occured while receiving"
     return byte_list
 
 

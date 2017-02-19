@@ -60,13 +60,8 @@ def signal_handler(signal, frame):
 
 signal.signal(signal.SIGINT, signal_handler)
 
-while True:
-    var = raw_input("")
-    if not var:
-        continue
-    print "Sending '%s'" % (var)
-    writeWireString(var)
-    time.sleep(0.5)
-    print "Receiving:"
-    print readWire(15)
-
+going = True
+while going:
+    data = readWire(15)
+    print data
+    time.sleep(0.3)
