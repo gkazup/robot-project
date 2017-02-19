@@ -33,12 +33,17 @@ int apwm_value = 0;
 int bpwm_value = 0;
 volatile unsigned long revleft = 0;
 volatile unsigned long revright = 0;
+unsigned long currentMillis = 0;    // current time
+unsigned long sensorMillis = 0;     // last time sensor data was taken
+unsigned long sensorDelay = 100;    // 0.1 sec delay between sensor data update
 
+// sonar setup
 NewPing sonar_left(TRIGGER_PIN_LEFT, ECHO_PIN_LEFT, MAX_DISTANCE);       // NewPing setup for left sensor
 NewPing sonar_middle(TRIGGER_PIN_MIDDLE, ECHO_PIN_MIDDLE, MAX_DISTANCE); // NewPing setup for middle sensor
 NewPing sonar_right(TRIGGER_PIN_RIGHT, ECHO_PIN_RIGHT, MAX_DISTANCE);    // NewPing setup for right sensor
+int sonarDistance[3] = {0, 0, 0};
 
-
+// SETUP function
 void setup()
 {
   // set all the motor control pins to outputs
@@ -66,19 +71,31 @@ void setup()
   pinMode(INPINR, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(INPINR), motor_rpm_right, FALLING); // interrupt registration
 
-  //initialize I2C communication
+  // initialize I2C communication
   Wire.begin(8);                // join i2c bus with address #0x08
   Wire.onReceive(receiveEvent); // register receive event
   Wire.onRequest(sendEvent);    // register send event
 }
 
-
+// MAIN loop
 void loop()
 {
-  if (datastring == ""){        // loop if there is nothing to do
+  currentMillis = millis();
+
+  // update the sensor values if it is time
+  if (currentMillis - sensorMillis > sensorDelay) {
+    sonarDistance[0] = sonar_left.ping_cm();
+    sonarDistance[1] = sonar_middle.ping_cm();
+    sonarDistance[2] = sonar_right.ping_cm();
+    sensorMillis = millis();
+  }
+
+  // loop if there is nothing to do
+  if (datastring == ""){
     return;
   }
 
+  // process the command string
   switch (datastring[0]) {
     case 'z':                    // zero out rev counters
       revleft = 0;
@@ -131,7 +148,6 @@ void loop()
 
     datastring = "";            // zero out the command string
 }
-
 
 // fancy motor control function
 void motorcontrol(int pwm1,int pwm2)
@@ -206,9 +222,9 @@ void sendEvent()
     sendarray[10-i] = ((localrevright >> (8*i)) & 0xFF);
   }
 
-  sendarray[11] = sonar_left.ping_cm();   // fill in the actual sonar values
-  sendarray[12] = sonar_middle.ping_cm();
-  sendarray[13] = sonar_right.ping_cm();
+  sendarray[11] = sonarDistance[0];   // fill in the actual sonar values
+  sendarray[12] = sonarDistance[1];
+  sendarray[13] = sonarDistance[2];
   
   sendarray[14] = 0;              // end the buffer with a zero  
   Wire.write(sendarray, len);     // send the completed buffer data over the wire
