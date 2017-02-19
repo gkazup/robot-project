@@ -35,7 +35,7 @@ volatile unsigned long revleft = 0;
 volatile unsigned long revright = 0;
 unsigned long currentMillis = 0;    // current time
 unsigned long sensorMillis = 0;     // last time sensor data was taken
-unsigned long sensorDelay = 100;    // 0.1 sec delay between sensor data update
+unsigned long sensorDelay = 50;    // milisec delay between sensor data update
 
 // sonar setup
 NewPing sonar_left(TRIGGER_PIN_LEFT, ECHO_PIN_LEFT, MAX_DISTANCE);       // NewPing setup for left sensor
