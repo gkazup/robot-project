@@ -124,9 +124,9 @@ def handle_keypress():
     return going
 
 def getCamFrame(camera,rawCapture):
-    camera.capture(rawCapture, format="bgr")
-    frame = rawCapture.array
-    #retval,frame=camera.read()
+#    camera.capture(rawCapture, format="bgr")
+#    frame = rawCapture.array
+    retval,frame=camera.read()
     frame = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
     #frame=numpy.rot90(frame)
     frame = pygame.surfarray.make_surface(frame)

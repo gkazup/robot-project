@@ -6,7 +6,9 @@ import time
 import cv2
 
 # initialize the camera and grab a reference to the raw camera capture
+screen_width, screen_height = 640, 480
 camera = PiCamera()
+camera.resolution = ((screen_width,screen_height))
 rawCapture = PiRGBArray(camera)
 
 # allow the camera to warmup
