@@ -65,9 +65,28 @@ def signal_handler(signal, frame):
     sys.exit(0)
 
 # handle keypresses
-def handle_keypress():
+def handle_keypress(input):
     going = True
     change = False
+    output = 0
+
+    if (1 == (input & 1)):
+        left = True
+    else:
+        left = False
+    if (2 == (input & 2)):
+        right = True
+    else:
+        right = False
+    if (4 == (input & 4)):
+        up = True
+    else:
+        up = False
+    if (8 == (input & 8)):
+        down = True
+    else:
+        down = False
+
     for e in pygame.event.get():
         if (e.type == pygame.QUIT):
             going = False
@@ -119,20 +138,31 @@ def handle_keypress():
             writeWireString("tr 150 150")
         if ( (not up) and (not down) and (not left) and (not right) ):
             writeWireString("s")
-        change = False
 
-    return going
+    if (left):
+        output += 1
+    if (right):
+        output += 2
+    if (up):
+        output += 4
+    if (down):
+        output += 8
+    if (going):
+        output += 16
+    return output
 
-def getCamFrame(camera,rawCapture):
-#    camera.capture(rawCapture, format="bgr")
-#    frame = rawCapture.array
-    retval,frame=camera.read()
-    frame = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
-    #frame=numpy.rot90(frame)
-    frame = pygame.surfarray.make_surface(frame)
+def getCamFrame(camera, rawCapture):
+    camera.capture(rawCapture, format="bgr")
+    rawframe = rawCapture.array
+    #cv2.imshow("Image", rawframe)
+    #cv2.waitKey(0) & 0xFF
+    frame = cv2.cvtColor(rawframe,cv2.COLOR_BGR2RGB)
+    frame = numpy.rot90(frame,3)
+    frame = numpy.fliplr(frame)
     return frame
 
-def blitCamFrame(frame,screen):
+def blitCamFrame(frame, screen):
+    frame = pygame.surfarray.make_surface(frame)
     screen.blit(frame,(0,0))
     return screen
 
@@ -143,31 +173,34 @@ signal.signal(signal.SIGINT, signal_handler)
 print "Initalizing..."
 pygame.init()
 pygame.key.set_repeat()
-screen_width, screen_height = 640, 480
+screen_width, screen_height = 320, 208
 screen = pygame.display.set_mode((screen_width,screen_height))
 pygame.display.set_caption("Video Control")
-screen.fill(0)
 
 camera = PiCamera()
 camera.resolution = ((screen_width,screen_height))
-camera.framerate = 16
-#rawCapture = PiRGBArray(camera, size=(screen_width,screen_height))
+#camera.framerate = 16
 rawCapture = PiRGBArray(camera)
 
 print "press ESC to exit"
-left = False
-right = False
-up = False
-down = False
+keyinfo = 0
+going = True
 writeWireString("e")
 
-going = True
+counter = 1
 while going:
-    going = handle_keypress()
-
-    frame = getCamFrame(camera,rawCapture)
-    screen = blitCamFrame(frame,screen)
-    pygame.display.flip()
+    keyinfo = handle_keypress(keyinfo)
+    if (16 == (keyinfo & 16)):
+        going = True
+    else:
+        going = False
+    if (counter == 100):
+        frame = getCamFrame(camera,rawCapture)
+        screen = blitCamFrame(frame, screen)
+        pygame.display.flip()
+        rawCapture.truncate(0)
+        counter = 0
+    counter += 1
     pygame.time.wait(10)
 
 # cleanup
