@@ -151,7 +151,8 @@ screen.fill(0)
 camera = PiCamera()
 camera.resolution = ((screen_width,screen_height))
 camera.framerate = 16
-rawCapture = PiRGBArray(camera, size=(screen_width,screen_height))
+#rawCapture = PiRGBArray(camera, size=(screen_width,screen_height))
+rawCapture = PiRGBArray(camera)
 
 print "press ESC to exit"
 left = False
