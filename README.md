@@ -2,4 +2,4 @@
 code repository for the robot project
 
 #
-<img src="/doc/robot_v1.2.jpg"/>
+<img src="/doc/robot_v1.2_small.jpg"/>
