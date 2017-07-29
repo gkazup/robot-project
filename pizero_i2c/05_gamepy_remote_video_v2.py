@@ -196,7 +196,7 @@ going = True
 writeWireString("e")
 
 if __name__ == "__main__":
-    videothread = Thread(target = threaded_video, args = (1000))
+    videothread = Thread(target = threaded_video, args = (1000, ))
     videothread.start()
 
 while going:
