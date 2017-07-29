@@ -128,6 +128,7 @@ while going:
             writeWireString("tr 150 150")
         if ( (not up) and (not down) and (not left) and (not right) ):
             writeWireString("s")
+            print readWire(15)
         change = False
 
     pygame.display.flip()
