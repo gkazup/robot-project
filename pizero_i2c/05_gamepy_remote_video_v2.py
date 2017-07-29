@@ -202,6 +202,7 @@ print "Use arrow keys to move, press ESC to exit"
 keyinfo = 0
 going = True
 writeWireString("e")
+writeWireString("z")
 
 while going:
     keyinfo = handle_keypress(keyinfo)

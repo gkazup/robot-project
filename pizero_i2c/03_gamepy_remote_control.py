@@ -73,6 +73,7 @@ right = False
 up = False
 down = False
 writeWireString("e")
+writeWireString("z")
 
 going = True
 change = False

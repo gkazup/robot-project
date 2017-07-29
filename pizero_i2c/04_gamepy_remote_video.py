@@ -186,6 +186,7 @@ print "press ESC to exit"
 keyinfo = 0
 going = True
 writeWireString("e")
+writeWireString("z")
 
 counter = 1
 while going:
