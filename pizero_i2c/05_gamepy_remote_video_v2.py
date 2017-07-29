@@ -211,8 +211,10 @@ while going:
         going = False
 
 # cleanup after finished running
+print "ESC pressed, cleanup before exiting..."
 writeWireString("s")
 writeWireString("d")
 videothread.join()
+print "Exiting"
 quit()
 
