@@ -186,21 +186,22 @@ def threaded_video(screen, wait):
 # MAIN part
 signal.signal(signal.SIGINT, signal_handler)
 
-print "Initalizing..."
+print "Initalizing pygame..."
 pygame.init()
 pygame.key.set_repeat()
 screen_width, screen_height = 320, 208
 screen = pygame.display.set_mode((screen_width,screen_height))
 pygame.display.set_caption("Video Control")
 
-print "press ESC to exit"
+print "Starting video in new thread..."
+if __name__ == "__main__":
+    videothread = Thread(target = threaded_video, args = (screen, 300, ))
+    videothread.start()
+
+print "Use arrow keys to move, press ESC to exit"
 keyinfo = 0
 going = True
 writeWireString("e")
-
-if __name__ == "__main__":
-    videothread = Thread(target = threaded_video, args = (screen, 1000, ))
-    videothread.start()
 
 while going:
     keyinfo = handle_keypress(keyinfo)
