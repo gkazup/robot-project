@@ -167,7 +167,15 @@ def blitCamFrame(frame, screen):
     screen.blit(frame,(0,0))
     return screen
 
+# camera thread
+# this will update the video in pygame
 def threaded_video(wait):
+    # init picamera
+    camera = PiCamera()
+    camera.resolution = ((screen_width,screen_height))
+    #camera.framerate = 16
+    rawCapture = PiRGBArray(camera)
+    # update frames until the main task is going
     while going:
         frame = getCamFrame(camera,rawCapture)
         screen = blitCamFrame(frame, screen)
@@ -185,11 +193,6 @@ screen_width, screen_height = 320, 208
 screen = pygame.display.set_mode((screen_width,screen_height))
 pygame.display.set_caption("Video Control")
 
-camera = PiCamera()
-camera.resolution = ((screen_width,screen_height))
-#camera.framerate = 16
-rawCapture = PiRGBArray(camera)
-
 print "press ESC to exit"
 keyinfo = 0
 going = True
@@ -206,7 +209,7 @@ while going:
     else:
         going = False
 
-# cleanup
+# cleanup after finished running
 writeWireString("s")
 writeWireString("d")
 videothread.join()
