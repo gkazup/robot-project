@@ -3,6 +3,7 @@ import smbus
 import time
 import sys
 import signal
+from threading import Thread
 import pygame
 import cv2
 import numpy
@@ -157,7 +158,7 @@ def getCamFrame(camera, rawCapture):
     #cv2.imshow("Image", rawframe)
     #cv2.waitKey(0) & 0xFF
     frame = cv2.cvtColor(rawframe,cv2.COLOR_BGR2RGB)
-    frame = numpy.rot90(frame,2)
+    frame = numpy.rot90(frame,3)
     frame = numpy.fliplr(frame)
     return frame
 
@@ -166,6 +167,13 @@ def blitCamFrame(frame, screen):
     screen.blit(frame,(0,0))
     return screen
 
+def threaded_video(wait):
+    while going:
+        frame = getCamFrame(camera,rawCapture)
+        screen = blitCamFrame(frame, screen)
+        pygame.display.flip()
+        rawCapture.truncate(0)
+        pygame.time.wait(wait)
 
 # MAIN part
 signal.signal(signal.SIGINT, signal_handler)
@@ -187,24 +195,20 @@ keyinfo = 0
 going = True
 writeWireString("e")
 
-counter = 1
+if __name__ == "__main__":
+    videothread = Thread(target = threaded_function, args = (1000))
+    videothread.start()
+
 while going:
     keyinfo = handle_keypress(keyinfo)
     if (16 == (keyinfo & 16)):
         going = True
     else:
         going = False
-    if (counter == 1000):
-        frame = getCamFrame(camera,rawCapture)
-        screen = blitCamFrame(frame, screen)
-        pygame.display.flip()
-        rawCapture.truncate(0)
-        counter = 0
-    counter += 1
-    #pygame.time.wait(10)
 
 # cleanup
 writeWireString("s")
 writeWireString("d")
+videothread.join()
 quit()
 
