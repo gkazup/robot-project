@@ -26,4 +26,19 @@ Control options:
 
 ## Mark-01
 The basic robot chassis
+Components list:
+- T200 Silver Aluminum tank car chassis
+- 8.4V 26650 Bike Light Battery Pack (36000mAh 6x26650 Rechargeable Li-ion Battery Pack For Bicycle Light)
+- 5.5*2.1mm DC Male Cable 24C/0.20 22Awg 12V
+- AMS1117 4.5-7V Turn 3.3V DC-DC Step Down Power Supply Module 
+- 22AWG 2pin power cord copper
+- Dual-Motor-Driver 1A TB6612FNG
+- FT232RL FTDI USB 3.3V 5.5V to TTL Serial Adapter Module
+- Pro Mini 328 Mini ATMEGA328 3.3V 8MHz
+- MP1584 Ultra-small size adjustable DC-DC step-down power supply module 3A
+- 1000 uF 50V capacitator
+- USB dual socket
+- 802.11n USB WiFi adapter
+- Raspberry Pi Zero
+- Micro USB plugs
 <img src="/doc/mark-01_small.jpg"/>
