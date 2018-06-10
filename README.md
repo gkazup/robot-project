@@ -8,7 +8,7 @@ It will be guided by various sensors:
 - ultrasonic sensors
 
 ## Mark-04
-Using Raspberry Pi 3 instead of a the Pi Zero.
+Using Raspberry Pi 3 instead of a Pi Zero.
 - ROS integration
 - new remote client built on websockets
 
