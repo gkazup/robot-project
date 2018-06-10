@@ -5,5 +5,21 @@ It will be guided by various sensors:
 - video camera for OpenCV
 - touch sensors
 - ultrasonic sensors
-#
-<img src="/doc/robot_v1.2_small.jpg"/>
+## Mark-01
+The basic robot chassis
+<img src="/doc/mark-01_small.jpg"/>
+## Mark-02
+With 3 ultrasonic sensors at the front for sensor coverage.
+Control options:
+- command line interface
+- gamepy with arrow keys for natural control
+<img src="/doc/mark-02_small.jpg"/>
+## Mark-03
+Ultrasonic sensors are ditched for a video camera.
+- remote control option has now a video feed integrated.
+- board layout streamlined
+<img src="/doc/mark-03_small.jpg"/>
+## Mark-04
+Pi 3 instead of a the Pi Zero.
+- ROS integration
+- níew remote client built on websockets
