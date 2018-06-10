@@ -21,6 +21,8 @@ Ultrasonic sensors are ditched for a video camera.
 ## Mark-02
 With 3 ultrasonic sensors at the front for sensor coverage.
 
+The motor driver and ultrasonic sensors are controlled by the Arduino. The raspberry Pi Zero is handling the high level business logic. Communication between the Arduino and Pi is through I2C.
+
 Control options:
 - command line interface
 - gamepy with arrow keys for natural control
