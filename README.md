@@ -1,6 +1,7 @@
 # robot-project
-code repository for the robot project
+Code repository for the robot project.
 The goal of this project is to create a self-driving tracked robot that is capable to move around and navigate in the house on it's own.
+
 It will be guided by various sensors:
 - video camera for OpenCV
 - touch sensors
@@ -19,13 +20,15 @@ Ultrasonic sensors are ditched for a video camera.
 
 ## Mark-02
 With 3 ultrasonic sensors at the front for sensor coverage.
+
 Control options:
 - command line interface
 - gamepy with arrow keys for natural control
 <img src="/doc/mark-02_small.jpg"/>
 
 ## Mark-01
-The basic robot chassis
+The basic robot chassis.
+
 Components list:
 - T200 Silver Aluminum tank car chassis
 - 8.4V 26650 Bike Light Battery Pack (36000mAh 6x26650 Rechargeable Li-ion Battery Pack For Bicycle Light)
