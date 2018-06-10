@@ -39,7 +39,7 @@ Components list:
 - FT232RL FTDI USB 3.3V 5.5V to TTL Serial Adapter Module
 - Pro Mini 328 Mini ATMEGA328 3.3V 8MHz
 - MP1584 Ultra-small size adjustable DC-DC step-down power supply module 3A
-- 1000 uF 50V capacitator
+- 1000 uF 50V capacitor
 - USB dual socket
 - 802.11n USB WiFi adapter
 - Raspberry Pi Zero
