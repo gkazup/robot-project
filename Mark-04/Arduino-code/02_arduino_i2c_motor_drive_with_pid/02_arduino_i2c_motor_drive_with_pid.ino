@@ -1,6 +1,7 @@
 // Receives data as an I2C slave device
 #include <Wire.h>
 #include <NewPing.h>
+#include <PID_v1.h>
 
 // connect motor controller pins to Arduino digital PINs
 #define STANDBY 5
@@ -17,13 +18,21 @@
 #define INPINR 2
 #define INPINL 3
 
+// PID variables
+double driveSetpoint, driveInput, driveOutput;
+int drivingStraight = 0;
+int diffleft, diffright;
+// Specify the links and initial tuning parameters
+PID drivePID(&driveInput, &driveOutput, &driveSetpoint, 2, 5, 1, DIRECT);
 
 // changing values
 String datastring = "";
 int apwm_value = 0;
 int bpwm_value = 0;
 volatile unsigned long revleft = 0;
+volatile unsigned long newrevleft = 0;
 volatile unsigned long revright = 0;
+volatile unsigned long newrevright = 0;
 unsigned long currentMillis = 0;    // current time
 unsigned long sensorMillis = 0;     // last time sensor data was taken
 unsigned long sensorDelay = 50;    // milisec delay between sensor data update
@@ -61,6 +70,13 @@ void setup()
   Wire.begin(8);                // join i2c bus with address #0x08
   Wire.onReceive(receiveEvent); // register receive event
   Wire.onRequest(sendEvent);    // register send event
+
+  // setup drivePID controller
+  driveInput = 0;
+  driveSetpoint = 0;
+
+  //turn the PID on
+  drivePID.SetMode(AUTOMATIC);
 }
 
 // MAIN loop
@@ -71,6 +87,37 @@ void loop()
   // update the sensor values if it is time
   if (currentMillis - sensorMillis > sensorDelay) {
     sensorMillis = millis();
+  }
+
+  // calculate drivePID and update drive motor PWM when driving straight
+  if (drivingStraight > 0){
+    // calculate revolution diference since last loop
+    diffleft = (int) (revleft - newrevleft);
+    diffright = (int) (revright - newrevright);
+    driveInput = (double) (diffleft - diffright);
+    // compute PID
+    drivePID.Compute();
+    // change PWM values depending on driving direction
+    switch (drivingStraight) {
+      case 1:                   // driving forward
+        apwm_value = apwm_value - (int) driveOutput;
+        bpwm_value = bpwm_value + (int) driveOutput;
+        constrain(apwm_value, 0, 255);
+        constrain(bpwm_value, 0, 255);
+        motorcontrol(apwm_value, bpwm_value);
+        break;
+      case 2:                   // driving backward
+        apwm_value = apwm_value + (int) driveOutput;
+        bpwm_value = bpwm_value - (int) driveOutput;
+        constrain(apwm_value, 0, 255);
+        constrain(bpwm_value, 0, 255);
+        motorcontrol((-1 * apwm_value),(-1 * bpwm_value));
+        break;
+      default:
+        break;
+    }
+    newrevleft = revleft;
+    newrevright = revright;
   }
 
   // loop if there is nothing to do
@@ -85,27 +132,37 @@ void loop()
       revright = 0;
       break;
     case 'e':                    // enable motor driver
+      drivingStraight = 0;
       digitalWrite(STANDBY, HIGH);
       break;
     case 'd':                    // disable motor driver
+      drivingStraight = 0;
       digitalWrite(STANDBY, LOW);
       break;
     case 'f':                    // drive forward
+      drivingStraight = 1;
+      newrevleft = revleft;
+      newrevright = revright;      
       apwm_value = datastring.substring(2).toInt();
       bpwm_value = apwm_value;
       motorcontrol(apwm_value, bpwm_value);
       break;
     case 'b':                    // drive backwards
+      drivingStraight = 2;
+      newrevleft = revleft;
+      newrevright = revright;
       apwm_value = datastring.substring(2).toInt();
       bpwm_value = apwm_value;
       motorcontrol((-1 * apwm_value),(-1 * bpwm_value));
       break;
     case 's':                    // stop!
+      drivingStraight = 0;
       stay();
       apwm_value = 0;
       bpwm_value = 0;
       break;
     case 't':                    // Turn. Second character determines how
+      drivingStraight = 0;
       apwm_value = datastring.substring(3,datastring.indexOf(' ',3)).toInt();
       bpwm_value = datastring.substring(datastring.indexOf(' ',3)+1).toInt();
       switch (datastring[1]) {
@@ -132,7 +189,7 @@ void loop()
     datastring = "";            // zero out the command string
 }
 
-// fancy motor control function
+// not so fancy motor control function
 void motorcontrol(int pwm1,int pwm2)
 {
   if (pwm1 < 0) {
@@ -209,9 +266,9 @@ void sendEvent()
   Wire.write(sendarray, len);     // send the completed buffer data over the wire
 }
 
-// functions to trigger by the hall sensor interrupts
+// functions triggered by the hall sensor interrupts
 // these functions are registered as events and should be as simple as possible
-// as the motors can run at 11500 rpm
+// as the motors can run up to 11500 rpm
 void motor_rpm_left()
 {
   revleft++;
