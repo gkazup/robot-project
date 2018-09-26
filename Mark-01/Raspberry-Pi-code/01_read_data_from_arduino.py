@@ -63,5 +63,5 @@ signal.signal(signal.SIGINT, signal_handler)
 going = True
 while going:
     data = readWire(15)
-    print data
+    print (data)
     time.sleep(0.3)
