@@ -64,7 +64,7 @@ while True:
     var = raw_input("")
     if not var:
         continue
-    print "Sending '%s'" % (var)
+    print "Sending '%s'" %(var)
     writeWireString(var)
     time.sleep(0.5)
     print "Receiving:"

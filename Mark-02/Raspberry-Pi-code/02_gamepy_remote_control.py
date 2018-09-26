@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 import smbus
 import time
 import sys
@@ -19,11 +19,11 @@ def writeWireString(value):
     if (count > 1):
         for index in range(1,(count)):
             byte_list.append(ord(value[index]))
-    print count,ord(value[0]),byte_list
+    print (count,ord(value[0]),byte_list)
     try:
         bus.write_i2c_block_data(address, ord(value[0]), byte_list)
     except IOError:
-        print "Error: IOError occured while sending"
+        print ("Error: IOError occured while sending")
     return -1
 
 
@@ -35,8 +35,8 @@ def readWireString(numbytes):
     try:
         byte_list = bus.read_i2c_block_data(address, 0, numbytes)
     except IOError:
-        print "Error: IOError occured while receiving"
-    print byte_list
+        print ("Error: IOError occured while receiving")
+    print (byte_list)
     for byte in byte_list:
         if (byte == 0):
             return data
@@ -51,23 +51,23 @@ def readWire(numbytes):
     try:
         byte_list = bus.read_i2c_block_data(address, 0, numbytes)
     except IOError:
-        print "Error: IOError occured while receiving"
+        print ("Error: IOError occured while receiving")
     return byte_list
 
 def signal_handler(signal, frame):
-    print '...Exiting...'
+    print ('...Exiting...')
     sys.exit(0)
 
 signal.signal(signal.SIGINT, signal_handler)
 
-print "Initalizing..."
+print ("Initalizing...")
 pygame.init()
 pygame.key.set_repeat()
 size = (100, 100)
 screen = pygame.display.set_mode(size)
 pygame.display.set_caption("Control")
 
-print "press ESC to exit"
+print ("press ESC to exit")
 left = False
 right = False
 up = False
@@ -129,7 +129,7 @@ while going:
             writeWireString("tr 150 150")
         if ( (not up) and (not down) and (not left) and (not right) ):
             writeWireString("s")
-            print readWire(15)
+            print (readWire(15))
         change = False
 
     pygame.display.flip()

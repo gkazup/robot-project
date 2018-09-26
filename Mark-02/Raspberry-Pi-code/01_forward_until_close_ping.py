@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 import smbus
 import time
 import sys
@@ -18,11 +18,11 @@ def writeWireString(value):
     if (count > 1):
         for index in range(1,(count)):
             byte_list.append(ord(value[index]))
-    print count,ord(value[0]),byte_list
+    print (count,ord(value[0]),byte_list)
     try:
         bus.write_i2c_block_data(address, ord(value[0]), byte_list)
     except IOError:
-        print "Error: IOError occured while sending"
+        print ("Error: IOError occured while sending")
     return -1
 
 
@@ -34,8 +34,8 @@ def readWireString(numbytes):
     try:
         byte_list = bus.read_i2c_block_data(address, 0, numbytes)
     except IOError:
-        print "Error: IOError occured while receiving"
-    print byte_list
+        print ("Error: IOError occured while receiving")
+    print (byte_list)
     for byte in byte_list:
         if (byte == 0):
             return data
@@ -50,19 +50,19 @@ def readWire(numbytes):
     try:
         byte_list = bus.read_i2c_block_data(address, 0, numbytes)
     except IOError:
-        print "Error: IOError occured while receiving"
+        print ("Error: IOError occured while receiving")
     return byte_list
 
 
 def signal_handler(signal, frame):
-    print '...Exiting...'
+    print ('...Exiting...')
     sys.exit(0)
 
 signal.signal(signal.SIGINT, signal_handler)
 
 
 var = raw_input("")
-print "Input '%s'" %(var)
+print ("Input '%s'" %(var))
 data = readWire(15)
 print data
 writeWireString("e")
@@ -73,7 +73,7 @@ time.sleep(0.1)
 going = True
 while going:
     data = readWire(15)
-    print data
+    print (data)
     if data[12] < 20:
         writeWireString("s")
         going = False
