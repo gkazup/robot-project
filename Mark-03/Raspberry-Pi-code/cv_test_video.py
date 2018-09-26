@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 # import the necessary packages
 from picamera.array import PiRGBArray
 from picamera import PiCamera
