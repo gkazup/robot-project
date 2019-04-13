@@ -8,9 +8,10 @@ It will be guided by various sensors:
 - ultrasonic sensors
 
 ## Mark-04
-Using Raspberry Pi 3 instead of a Pi Zero.
-- ROS integration
-- new remote client built on websockets
+Full redesign
+- using Raspberry Pi 3 instead of a Pi Zero
+- using a robodyne compact Arduino Mega 2560
+- now with a robot arm
 
 ## Mark-03
 Ultrasonic sensors are ditched for a video camera.
