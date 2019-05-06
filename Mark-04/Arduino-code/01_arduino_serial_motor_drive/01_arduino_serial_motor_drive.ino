@@ -2,14 +2,14 @@
 
 // connect motor controller pins to Arduino digital PINs
 #define STANDBY 39
-// motor one
+// motor left
 #define APWM 4
 #define AIN1 35
 #define AIN2 37
-// motor two
+// motor right
 #define BPWM 2
-#define BIN1 41
-#define BIN2 43
+#define BIN1 43
+#define BIN2 41
 
 //arm stuff
 #define ARMRELAY 24
@@ -26,6 +26,7 @@
 // data communication
 String datastring = "";
 int dataready = 0;
+int debugflag = 1;        // enabled:1, disabled:0, toggle with the "q" command strings
 
 // motor values
 int apwm_value = 0;
@@ -105,8 +106,10 @@ void loop()
 
   // act on full command string received
   if (newdata) {
-    Serial.print("received: ");
-    Serial.println(datastring);
+    if (debugflag) {
+      Serial.print("data: ");
+      Serial.println(datastring);
+    }
 
     processdata(datastring);
     datastring = "";            // zero out the command string
@@ -119,6 +122,7 @@ void loop()
 
 }
 
+
 // process the command string
 void processdata(String command)
 {
@@ -127,27 +131,47 @@ void processdata(String command)
     case 'z':                    // drive zero out rev counters
       revleft = 0;
       revright = 0;
+      if (debugflag ) {
+        Serial.println("command: zero rev counters");
+      }
       break;
     case 'e':                    // drive enable motor driver
       digitalWrite(STANDBY, HIGH);
+      if (debugflag ) {
+        Serial.println("command: enable motor driver");
+      }
       break;
     case 'd':                    // drive disable motor driver
       digitalWrite(STANDBY, LOW);
+      if (debugflag ) {
+        Serial.println("command: disable motor driver");
+      }
       break;
     case 'f':                    // drive forward
       apwm_value = command.substring(2).toInt();
       bpwm_value = apwm_value;
       motorcontrol(apwm_value, bpwm_value);
+      if (debugflag ) {
+        Serial.print("command: forward ");
+        Serial.println(apwm_value);
+      }
       break;
     case 'b':                    // drive backwards
       apwm_value = command.substring(2).toInt();
       bpwm_value = apwm_value;
       motorcontrol((-1 * apwm_value),(-1 * bpwm_value));
+      if (debugflag ) {
+        Serial.print("command: backward ");
+        Serial.println(apwm_value);
+      }
       break;
     case 's':                    // drive stop!
       stay();
       apwm_value = 0;
       bpwm_value = 0;
+      if (debugflag ) {
+        Serial.println("command: STOP");
+      }
       break;
     case 't':                    // drive turn. Second character determines how
       apwm_value = command.substring(3,command.indexOf(' ',3)).toInt();
@@ -155,15 +179,39 @@ void processdata(String command)
       switch (command[1]) {
         case 'f':                    // turn forward
           motorcontrol(apwm_value, bpwm_value);
+          if (debugflag ) {
+            Serial.print("command: turn forward ");
+            Serial.print(apwm_value);
+            Serial.print(" ");
+            Serial.println(bpwm_value);
+          }
           break;
         case 'b':                    // turn backward
           motorcontrol((-1 * apwm_value),(-1 * bpwm_value));
+          if (debugflag ) {
+            Serial.print("command: turn backward ");
+            Serial.print(apwm_value);
+            Serial.print(" ");
+            Serial.println(bpwm_value);
+          }
           break;
         case 'l':                    // turn on the same spot left
           motorcontrol((-1 * apwm_value),(bpwm_value));
+          if (debugflag ) {
+            Serial.print("command: turn on spot left ");
+            Serial.print(apwm_value);
+            Serial.print(" ");
+            Serial.println(bpwm_value);
+          }
           break;
         case 'r':                    // turn on the same spot right
           motorcontrol((apwm_value),(-1 * bpwm_value));
+          if (debugflag ) {
+            Serial.print("command: turn on spot right ");
+            Serial.print(apwm_value);
+            Serial.print(" ");
+            Serial.println(bpwm_value);
+          }
           break;
         default:
           break;
@@ -171,9 +219,23 @@ void processdata(String command)
       break;
     case 'j':                    // arm: switch on the ARM replay
       digitalWrite(ARMRELAY, LOW);
+      if (debugflag ) {
+        Serial.println("command: ARM on");
+      }
       break;
-    case 'k':                    // arm: switch on the ARM replay
+    case 'k':                    // arm: switch off the ARM replay
       digitalWrite(ARMRELAY, HIGH);
+      if (debugflag ) {
+        Serial.println("command: ARM off");
+      }
+      break;
+    case 'q':                    // toggle serial debug
+      if (debugflag) {
+        debugflag = 0;
+      } else {
+        debugflag = 1;
+        Serial.println("command: enable debugflag");
+      }
       break;
     default:                    // unknown command
       break;
@@ -206,7 +268,7 @@ void motorcontrol(int pwm1,int pwm2)
 }
 
 
-// this function will stop all movement
+// this function will stop all drive movement
 void stay()
 {
   // turn off motors
