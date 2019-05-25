@@ -99,6 +99,6 @@ if __name__ == '__main__':
     going = True
     while going:
         send_machine_info()
-        sleep(10)
+        time.sleep(10)
 
     quit()
