@@ -14,7 +14,7 @@ int datareceived = 0;                 // flag for processing the datastring
 unsigned long millisCurrent = 0;      // current time
 
 unsigned long millisData = 0;         // last time data was received
-unsigned long delayData = 10000;      // timeout in milisec for the I2C comm
+unsigned long delayData = 20000;      // timeout in milisec for the I2C comm
 
 unsigned long millisScreenSaver;      // last time screen saver kicked in
 unsigned long delayScreenSaver = 5000;      // timeout in milisec for the screen saver to act
@@ -55,9 +55,9 @@ void loop(void)
 
   // check communication timeout
   if (millisCurrent - millisData > delayData) {
-    u8x8log.print("Waiting for data...");
+    u8x8log.print("Wait for pi...");
     u8x8log.print("\n");
-    delay(100);
+    delay(2000);
   }
 
   // check screen saver timer
