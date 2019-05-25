@@ -76,9 +76,11 @@ def send_machine_info():
                 | awk '{print $4}' \
                 | awk -F\\\" '{print $2}'").read()
     writeWireString("host: " + hostname)
+    time.sleep(1)
     writeWireString("ssid: " + ssid.rstrip("\n\r"))
-    writeWireString("ip: " + ipaddress.rstrip("\n\r"))
-
+    time.sleep(1)
+    writeWireString(ipaddress.rstrip("\n\r"))
+    time.sleep(1)
 
 def shutdown_system():
     writeWireString("Shutdown...")
@@ -90,8 +92,6 @@ def shutdown_system():
 ################################
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal_handler)
-
-    writeWireString("Initializing...")
 
     shutdown_btn = Button(21, hold_time=2)
     shutdown_btn.when_held = shutdown_system
