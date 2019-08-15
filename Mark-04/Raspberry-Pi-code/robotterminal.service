@@ -1,0 +1,13 @@
+[Unit]
+Description=Robot terminal service
+After=network.target
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=pi
+ExecStart=/usr/bin/python3 /usr/pi/terminal_agent.py
+
+[Install]
+WantedBy=multi-user.target
