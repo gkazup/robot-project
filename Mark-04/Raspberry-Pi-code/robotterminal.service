@@ -7,7 +7,7 @@ Type=simple
 Restart=always
 RestartSec=1
 User=pi
-ExecStart=/usr/bin/python3 /usr/pi/terminal_agent.py
+ExecStart=/usr/bin/python3 /usr/pi/agent_terminal.py
 
 [Install]
 WantedBy=multi-user.target
